@@ -1,0 +1,255 @@
+
+.scanner-page {
+  width: 100%;
+  max-width: 1250px;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 55px 35px;
+  box-sizing: border-box;
+  color: #f5f3fa;
+}
+
+.scanner-header {
+  width: 100%;
+  margin: 0 auto 35px;
+}
+
+.scanner-header .section-label {
+  display: block;
+  margin-bottom: 12px;
+}
+
+.scanner-header h1 {
+  font-size: clamp(30px, 4vw, 42px);
+  margin: 0 0 12px;
+}
+
+.scanner-header p {
+  margin: 0;
+  color: #aaa6b9;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.scanner-layout {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 28px;
+  align-items: stretch;
+}
+
+.scanner-panel,
+.scanner-result-panel {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 28px;
+  border-radius: 18px;
+  background: #171f36;
+  border: 1px solid rgba(217, 184, 232, 0.15);
+}
+
+.scanner-panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.scanner-panel-heading > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.scanner-panel-heading svg {
+  color: #d9b8e8;
+  flex-shrink: 0;
+}
+
+.scanner-panel-heading h2,
+.scanner-result-heading h2 {
+  font-size: 21px;
+  margin: 0;
+}
+
+.scanner-live-status {
+  padding: 7px 14px;
+  border-radius: 20px;
+  background: rgba(121, 82, 163, 0.2);
+  color: #d9b8e8;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.qr-reader-container {
+  width: 100%;
+  min-height: 340px;
+  box-sizing: border-box;
+  border: 2px dashed rgba(217, 184, 232, 0.4);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #10172b;
+}
+
+.scanner-placeholder {
+  min-height: 340px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 25px;
+  box-sizing: border-box;
+}
+
+.scanner-placeholder > svg {
+  color: #d9b8e8;
+}
+
+.scanner-placeholder h3 {
+  margin: 18px 0 8px;
+}
+
+.scanner-placeholder p {
+  max-width: 300px;
+  margin: 0;
+  color: #aaa6b9;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.scanner-instruction {
+  margin: 20px 0 0;
+  color: #aaa6b9;
+  font-size: 13px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.scanner-result-heading {
+  margin-bottom: 25px;
+}
+
+.scanner-result-heading .section-label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.scanner-empty-result {
+  min-height: 340px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.scanner-empty-result > svg {
+  color: #7952a3;
+}
+
+.scanner-empty-result h3 {
+  margin: 18px 0 8px;
+}
+
+.scanner-empty-result p {
+  max-width: 300px;
+  margin: 0;
+  color: #aaa6b9;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.scanner-status-card {
+  padding: 25px;
+  border-radius: 14px;
+  text-align: center;
+  background: #10172b;
+}
+
+.scanner-status-card.valid > svg {
+  color: #65d69c;
+}
+
+.scanner-status-card.used > svg {
+  color: #f0b65c;
+}
+
+.scanner-status-card.invalid > svg {
+  color: #f07b8a;
+}
+
+.scanner-status-card h3 {
+  margin: 14px 0 8px;
+}
+
+.scanner-status-card > p {
+  color: #aaa6b9;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.scanner-booking-details {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: left;
+}
+
+.scanner-booking-details h4 {
+  margin: 0 0 17px;
+}
+
+.scanner-booking-details p {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #c9c4d4;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 14px 0;
+  overflow-wrap: anywhere;
+}
+
+.scanner-booking-details svg {
+  color: #d9b8e8;
+  flex-shrink: 0;
+}
+
+@media (max-width: 800px) {
+  .scanner-page {
+    padding: 40px 25px;
+  }
+
+  .scanner-layout {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .scanner-page {
+    padding: 30px 16px;
+  }
+
+  .scanner-panel,
+  .scanner-result-panel {
+    padding: 18px;
+  }
+
+  .scanner-panel-heading h2,
+  .scanner-result-heading h2 {
+    font-size: 18px;
+  }
+
+  .qr-reader-container,
+  .scanner-placeholder,
+  .scanner-empty-result {
+    min-height: 280px;
+  }
+}
