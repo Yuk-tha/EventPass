@@ -44,7 +44,12 @@ function BookingModal({
   const [paymentStep, setPaymentStep] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('upi')
 
+  const [nameError, setNameError] = useState('')
+  const [emailError, setEmailError] = useState('')
+
   const total = event.price * quantity
+
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -56,11 +61,52 @@ function BookingModal({
     return () => window.removeEventListener('keydown', handleEscape)
   }, [onClose])
 
+  const handleNameChange = (value: string) => {
+    onNameChange(value)
+
+    if (value.trim()) {
+      setNameError('')
+    } else {
+      setNameError('Please enter your full name')
+    }
+  }
+
+  const handleEmailChange = (value: string) => {
+    onEmailChange(value)
+
+    if (!value.trim()) {
+      setEmailError('Please enter your email address')
+    } else if (!emailPattern.test(value.trim())) {
+      setEmailError('Please enter a valid email address')
+    } else {
+      setEmailError('')
+    }
+  }
+
   const handleContinue = () => {
-    if (
-      customerName.trim() &&
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)
-    ) {
+    const trimmedName = customerName.trim()
+    const trimmedEmail = customerEmail.trim()
+
+    let isValid = true
+
+    if (!trimmedName) {
+      setNameError('Please enter your full name')
+      isValid = false
+    } else {
+      setNameError('')
+    }
+
+    if (!trimmedEmail) {
+      setEmailError('Please enter your email address')
+      isValid = false
+    } else if (!emailPattern.test(trimmedEmail)) {
+      setEmailError('Please enter a valid email address')
+      isValid = false
+    } else {
+      setEmailError('')
+    }
+
+    if (isValid) {
       setPaymentStep(true)
     }
   }
@@ -90,7 +136,9 @@ function BookingModal({
           <div className="booking-success-content">
             <CheckCircle2 size={58} />
             <h2>Payment Successful!</h2>
-            <p>Your demo payment is complete and your booking is confirmed.</p>
+            <p>
+              Your demo payment is complete and your booking is confirmed.
+            </p>
 
             <button className="booking-confirm-btn" onClick={onClose}>
               Done
@@ -112,6 +160,7 @@ function BookingModal({
               <span className="section-label">
                 {paymentStep ? 'SECURE CHECKOUT' : 'RESERVE YOUR SPOT'}
               </span>
+
               <h2 id="booking-modal-title">
                 {paymentStep ? 'Complete Your Payment' : 'Book Your Tickets'}
               </h2>
@@ -145,22 +194,40 @@ function BookingModal({
             {!paymentStep ? (
               <div className="booking-form">
                 <label htmlFor="booking-name">Full Name</label>
+
                 <input
                   id="booking-name"
                   type="text"
                   value={customerName}
-                  onChange={(e) => onNameChange(e.target.value)}
+                  onChange={(e) => handleNameChange(e.target.value)}
                   placeholder="Enter your full name"
+                  aria-invalid={!!nameError}
+                  aria-describedby={nameError ? 'booking-name-error' : undefined}
                 />
 
+                {nameError && (
+                  <small id="booking-name-error" className="booking-error">
+                    {nameError}
+                  </small>
+                )}
+
                 <label htmlFor="booking-email">Email Address</label>
+
                 <input
                   id="booking-email"
                   type="email"
                   value={customerEmail}
-                  onChange={(e) => onEmailChange(e.target.value)}
+                  onChange={(e) => handleEmailChange(e.target.value)}
                   placeholder="Enter your email address"
+                  aria-invalid={!!emailError}
+                  aria-describedby={emailError ? 'booking-email-error' : undefined}
                 />
+
+                {emailError && (
+                  <small id="booking-email-error" className="booking-error">
+                    {emailError}
+                  </small>
+                )}
 
                 <label>Number of Tickets</label>
 
@@ -190,8 +257,10 @@ function BookingModal({
                       <Ticket size={16} />
                       {quantity} ticket(s)
                     </span>
+
                     <strong>₹{total.toLocaleString('en-IN')}</strong>
                   </div>
+
                   <small>
                     ₹{event.price.toLocaleString('en-IN')} per ticket
                   </small>
@@ -199,10 +268,6 @@ function BookingModal({
 
                 <button
                   className="booking-confirm-btn"
-                  disabled={
-                    !customerName.trim() ||
-                    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)
-                  }
                   onClick={handleContinue}
                 >
                   Continue to Payment
@@ -224,7 +289,11 @@ function BookingModal({
                   >
                     <Smartphone size={22} />
                     <span>UPI</span>
-                    <input type="radio" checked={paymentMethod === 'upi'} readOnly />
+                    <input
+                      type="radio"
+                      checked={paymentMethod === 'upi'}
+                      readOnly
+                    />
                   </button>
 
                   <button
@@ -233,7 +302,11 @@ function BookingModal({
                   >
                     <CreditCard size={22} />
                     <span>Credit / Debit Card</span>
-                    <input type="radio" checked={paymentMethod === 'card'} readOnly />
+                    <input
+                      type="radio"
+                      checked={paymentMethod === 'card'}
+                      readOnly
+                    />
                   </button>
 
                   <button
@@ -242,7 +315,11 @@ function BookingModal({
                   >
                     <Landmark size={22} />
                     <span>Net Banking</span>
-                    <input type="radio" checked={paymentMethod === 'netbanking'} readOnly />
+                    <input
+                      type="radio"
+                      checked={paymentMethod === 'netbanking'}
+                      readOnly
+                    />
                   </button>
                 </div>
 

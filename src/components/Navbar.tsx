@@ -11,9 +11,11 @@ import {
   Bell,
   CheckCheck,
   Trash2,
+  LogIn,
+  LogOut,
 } from 'lucide-react'
 
-import type { Notification } from '../types'
+import type { Notification, User } from '../types'
 
 export type PageName =
   | 'home'
@@ -26,22 +28,28 @@ export type PageName =
 
 type NavbarProps = {
   currentPage: PageName
+  currentUser: User | null
   notifications: Notification[]
   unreadCount: number
   onNavigate: (page: PageName) => void
   onMarkRead: (id: string) => void
   onMarkAllRead: () => void
   onClearNotifications: () => void
+  onAuthClick: () => void
+  onLogout: () => void
 }
 
 function Navbar({
   currentPage,
+  currentUser,
   notifications,
   unreadCount,
   onNavigate,
   onMarkRead,
   onMarkAllRead,
   onClearNotifications,
+  onAuthClick,
+  onLogout,
 }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
@@ -56,6 +64,18 @@ function Navbar({
 
   const navigateTo = (page: PageName) => {
     onNavigate(page)
+    setMobileMenuOpen(false)
+    setNotificationsOpen(false)
+  }
+
+  const handleAuthClick = () => {
+    onAuthClick()
+    setMobileMenuOpen(false)
+    setNotificationsOpen(false)
+  }
+
+  const handleLogout = () => {
+    onLogout()
     setMobileMenuOpen(false)
     setNotificationsOpen(false)
   }
@@ -174,6 +194,24 @@ function Navbar({
             <UserRound size={19} />
           </button>
 
+          {currentUser ? (
+            <button
+              className="navbar-auth-btn"
+              onClick={handleLogout}
+            >
+              <LogOut size={17} />
+              Logout
+            </button>
+          ) : (
+            <button
+              className="navbar-auth-btn"
+              onClick={handleAuthClick}
+            >
+              <LogIn size={17} />
+              Login / Register
+            </button>
+          )}
+
           <button
             className="navbar-menu-btn"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -204,6 +242,24 @@ function Navbar({
               </button>
             )
           })}
+
+          {currentUser ? (
+            <button
+              className="navbar-mobile-link"
+              onClick={handleLogout}
+            >
+              <LogOut size={18} />
+              Logout
+            </button>
+          ) : (
+            <button
+              className="navbar-mobile-link"
+              onClick={handleAuthClick}
+            >
+              <LogIn size={18} />
+              Login / Register
+            </button>
+          )}
         </nav>
       )}
     </header>

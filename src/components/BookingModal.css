@@ -303,3 +303,13 @@
     font-size: 21px;
   }
 }
+.booking-error {
+  color: #ff7070;
+  font-size: 12px;
+  margin-top: -8px;
+  margin-bottom: 10px;
+}
+
+.booking-form input[aria-invalid="true"] {
+  border-color: #ff7070;
+}

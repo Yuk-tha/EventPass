@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from 'react'
 import { Html5QrcodeScanner } from 'html5-qrcode'
+import { ArrowLeft } from 'lucide-react'
 
 import './App.css'
 
@@ -11,6 +12,8 @@ import type {
   Booking,
   Profile,
   Notification,
+  AuthResponse,
+  User,
 } from './types'
 
 import Navbar, { type PageName } from './components/Navbar'
@@ -23,9 +26,11 @@ import Bookings from './pages/Bookings'
 import Tickets from './pages/Tickets'
 import Scanner, { type ScannerResult } from './pages/Scanner'
 import ProfilePage from './pages/Profile'
+import Auth from './pages/Auth'
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<PageName>('home')
+  const [currentPage, setCurrentPage] = useState<PageName | 'auth'>('home')
+
   const [selectedCategory, setSelectedCategory] = useState('')
   const [viewingEvent, setViewingEvent] = useState<EventItem | null>(null)
 
@@ -37,10 +42,38 @@ function App() {
   const [customerEmail, setCustomerEmail] = useState('')
   const [bookingSuccess, setBookingSuccess] = useState(false)
 
+  // Authentication State
+  const [authToken, setAuthToken] = useState(
+    () => localStorage.getItem('eventpass-token') || '',
+  )
+
+  const [currentUser, setCurrentUser] = useState<User | null>(() => {
+    try {
+      const savedUser = localStorage.getItem('eventpass-user')
+      return savedUser ? JSON.parse(savedUser) as User : null
+    } catch {
+      return null
+    }
+  })
+
+  const [postAuthPage, setPostAuthPage] = useState<PageName>('home')
+
   const [bookings, setBookings] = useState<Booking[]>(() => {
     try {
       const saved = localStorage.getItem('eventpass-bookings')
       return saved ? JSON.parse(saved) : []
+    } catch {
+      return []
+    }
+  })
+
+  const [usedTicketIds, setUsedTicketIds] = useState<string[]>(() => {
+    try {
+      const saved = JSON.parse(
+        localStorage.getItem('eventpass-used-tickets') || '[]',
+      )
+
+      return Array.isArray(saved) ? saved : []
     } catch {
       return []
     }
@@ -151,6 +184,24 @@ function App() {
 
   // Navigation handlers
   const navigateTo = (page: PageName) => {
+    const protectedPages: PageName[] = [
+      'bookings',
+      'tickets',
+      'scanner',
+      'profile',
+    ]
+
+    if (protectedPages.includes(page) && !authToken) {
+      setPostAuthPage(page)
+      setCurrentPage('auth')
+      return
+    }
+
+    if (page === 'scanner' && currentUser?.role !== 'admin') {
+      window.alert('Access denied. Admin permission required.')
+      return
+    }
+
     setCurrentPage(page)
 
     if (page !== 'event-details') {
@@ -166,6 +217,69 @@ function App() {
   const viewEvent = (event: EventItem) => {
     setViewingEvent(event)
     setCurrentPage('event-details')
+  }
+
+  // Open Login / Register
+  const handleAuthClick = () => {
+    setPostAuthPage('home')
+    setCurrentPage('auth')
+  }
+
+  // Authentication Success
+  const handleAuthSuccess = (data: AuthResponse) => {
+    localStorage.setItem('eventpass-token', data.token)
+    localStorage.setItem('eventpass-user', JSON.stringify(data.user))
+
+    setAuthToken(data.token)
+    setCurrentUser(data.user)
+
+    const updatedProfile = {
+      name: data.user.name,
+      email: data.user.email,
+    }
+
+    setProfile(updatedProfile)
+
+    localStorage.setItem(
+      'eventpass-profile',
+      JSON.stringify(updatedProfile),
+    )
+
+    if (postAuthPage === 'scanner' && data.user.role !== 'admin') {
+      setCurrentPage('home')
+      window.alert('Access denied. Admin permission required.')
+      return
+    }
+
+    setCurrentPage(postAuthPage)
+  }
+
+  // Logout
+  const handleLogout = () => {
+    localStorage.removeItem('eventpass-token')
+    localStorage.removeItem('eventpass-user')
+    localStorage.removeItem('eventpass-profile')
+
+    setAuthToken('')
+    setCurrentUser(null)
+    setProfile({ name: '', email: '' })
+
+    setSelectedEvent(null)
+    setBookingSuccess(false)
+    setViewingEvent(null)
+    setScannerResult(null)
+    setPostAuthPage('home')
+    setCurrentPage('home')
+
+    window.alert('Logged out successfully!')
+  }
+
+  // Back from Authentication
+  const handleAuthBack = () => {
+    setSelectedEvent(null)
+    setBookingSuccess(false)
+    setPostAuthPage('home')
+    setCurrentPage('home')
   }
 
   // Profile save
@@ -189,6 +303,11 @@ function App() {
     setCustomerName(profile.name || '')
     setCustomerEmail(profile.email || '')
     setBookingSuccess(false)
+
+    if (!authToken) {
+      setPostAuthPage('home')
+      setCurrentPage('auth')
+    }
   }
 
   const closeBooking = () => {
@@ -306,6 +425,8 @@ function App() {
           }
 
           if (savedUsedIds.includes(matchedBooking.id)) {
+            setUsedTicketIds(savedUsedIds)
+
             setScannerResult({
               status: 'used',
               booking: matchedBooking,
@@ -322,6 +443,8 @@ function App() {
             'eventpass-used-tickets',
             JSON.stringify(updatedUsedIds),
           )
+
+          setUsedTicketIds(updatedUsedIds)
 
           setScannerResult({
             status: 'valid',
@@ -341,17 +464,45 @@ function App() {
     }
   }, [currentPage, bookings])
 
+  // Back to Home handler
+  const goToHome = () => {
+    setCurrentPage('home')
+    setViewingEvent(null)
+  }
+
   return (
     <main className="app">
-      <Navbar
-        currentPage={currentPage}
-        notifications={notifications}
-        unreadCount={unreadCount}
-        onNavigate={navigateTo}
-        onMarkRead={markNotificationRead}
-        onMarkAllRead={markAllNotificationsRead}
-        onClearNotifications={clearNotifications}
-      />
+      {currentPage !== 'auth' && (
+        <Navbar
+          currentPage={currentPage}
+          currentUser={currentUser}
+          notifications={notifications}
+          unreadCount={unreadCount}
+          onNavigate={navigateTo}
+          onMarkRead={markNotificationRead}
+          onMarkAllRead={markAllNotificationsRead}
+          onClearNotifications={clearNotifications}
+          onAuthClick={handleAuthClick}
+          onLogout={handleLogout}
+        />
+      )}
+
+      {currentPage === 'auth' && (
+        <Auth
+          onAuthSuccess={handleAuthSuccess}
+          onBack={handleAuthBack}
+        />
+      )}
+
+      {['bookings', 'tickets', 'scanner', 'profile'].includes(currentPage) && (
+        <button
+          className="back-home-btn"
+          onClick={goToHome}
+        >
+          <ArrowLeft size={17} />
+          Back to Home
+        </button>
+      )}
 
       {currentPage === 'home' && (
         <Home
@@ -385,6 +536,7 @@ function App() {
       {currentPage === 'bookings' && (
         <Bookings
           bookings={bookings}
+          usedTicketIds={usedTicketIds}
           onCancel={cancelBooking}
           onExplore={() => setCurrentPage('home')}
         />
@@ -409,7 +561,7 @@ function App() {
         />
       )}
 
-      {selectedEvent && (
+      {selectedEvent && currentPage !== 'auth' && (
         <BookingModal
           event={selectedEvent}
           customerName={customerName}

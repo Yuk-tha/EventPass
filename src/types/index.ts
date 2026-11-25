@@ -22,3 +22,29 @@ export type Notification = {
   createdAt: string
   read: boolean
 }
+
+// Authentication Types
+export type User = {
+  id: string
+  name: string
+  email: string
+  role: 'user' | 'admin'
+}
+
+export type AuthResponse = {
+  success: boolean
+  message: string
+  token: string
+  user: User
+}
+
+export type LoginCredentials = {
+  email: string
+  password: string
+}
+
+export type RegisterData = {
+  name: string
+  email: string
+  password: string
+}
